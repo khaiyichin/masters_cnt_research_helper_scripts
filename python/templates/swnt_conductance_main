@@ -1,0 +1,12 @@
+#!/bin/bash
+
+sbatch_parameters
+
+cd ./left
+source left
+
+cd ../right
+source right
+
+cd ..
+source job_name

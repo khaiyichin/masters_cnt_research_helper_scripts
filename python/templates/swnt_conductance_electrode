@@ -1,0 +1,50 @@
+#!/bin/bash
+
+cat > job_name.fdf << EOF
+SystemName          job_name electrode
+SystemLabel         job_name
+
+NumberOfAtoms		num_atoms
+NumberOfSpecies		4
+
+%block ChemicalSpeciesLabel 
+1	19	K
+2	79	Au
+3	35	Br
+4	6	C	# Species index, atomic number, species label
+%endblock ChemicalSpeciesLabel
+
+AtomicCoordinatesFormat  Ang
+
+LatticeConstant		1 Ang
+
+%block LatticeParameters
+l_x	l_y	l_z	90.	90.	90.
+%endblock LatticeParameters
+
+%block kgrid_Monkhorst_Pack
+1	0	0	0.0
+0	1	0	0.0
+0	0	10	0.0
+%endblock kgrid_Monkhorst_Pack
+
+%block AtomicCoordinatesAndAtomicSpecies
+coord_block
+%endblock AtomicCoordinatesAndAtomicSpecies
+
+MeshCutoff		300 Ry		
+xc.functional		GGA		
+xc.authors		PBE		
+WriteDenchar		.true.		
+WriteCoorXmol		.true.		
+WriteEigenvalues	.true.		
+DM.NumberPulay     	5		
+DM.MixingWeight		0.01		
+DM.UseSaveDM		.true.		
+MaxSCFIterations	500		
+PAO.EnergyShift		0.011 Ry	
+EOF
+
+# Launch MPI job...
+# mpirun -np 20 /home/khaiyi/src/siesta-4.0/transiesta < some_name.fdf |tee some_name.out
+ibrun ./transiesta < job_name.fdf

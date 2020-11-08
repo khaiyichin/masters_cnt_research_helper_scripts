@@ -12,6 +12,9 @@
 #  	vdW radii for interacting species is the sum of atom vdw radii: Rab=Ra+Rb	#
 #################################################################################
 
+# The DFT_D4 program can be obtained from:
+# https://github.com/dftd4/dftd4
+
 # The DFT_D3 program can be obtained from:
 # https://www.chemie.uni-bonn.de/pctc/mulliken-center/software/dft-d3/get-the-current-version-of-dft-d3
 
@@ -21,12 +24,12 @@ import math
 import shutil
 
 ######## Update your Date Base here ########
-# / atom number / C6AA (eV) / vdW Radii (Bohr)/ #
+# / atom number / C6AA (eV angstrom^6) / vdW Radii (angstrom)/ #
 
-db=[[6, 1333.083, 0.0321, 'C'],		# C
-	[19, 131107.427, 0.0831, 'K'],		# K
-	[35, 4548.917, 0.0472, 'Br'],		# Br 
-	[79, 9301.375, 0.0605, 'Au']]		# Au
+db=[[6, 29.4484, 1.96, 'C'],			# C
+	[19, 3338.9200, 3.02, 'K'],		# K
+	[35, 100.2918, 2.10, 'Br'],		# Br 
+	[79, 206.8629, 2.41, 'Au']]		# Au
 ############################################
 index_atom=[row[0] for row in db]
 
@@ -59,8 +62,6 @@ print '\nYour index of the atoms will be:', index1,'\n'
 
 
 ct = open('MM_section','w')
-ct.write('MM.UnitsDistance\tBohr\n')
-ct.write('MM.UnitsEnergy\tau\n')
 ct.write('MM.Grimme.S6\t1.0\n\n')
 ct.write('%block MM.Potentials\n')
 
@@ -75,6 +76,3 @@ for x in range(1, counter1+1):
 ct.write('%endblock MM.Potentials\n')
 
 ct.close()
-
-
-

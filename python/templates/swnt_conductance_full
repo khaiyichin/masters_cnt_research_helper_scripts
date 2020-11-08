@@ -1,0 +1,69 @@
+#!/bin/bash
+
+cat > job_name.fdf << EOF
+SystemName          job_name
+SystemLabel         job_name
+
+NumberOfAtoms		num_atoms
+NumberOfSpecies		4
+
+%block ChemicalSpeciesLabel 
+1	19	K
+2	79	Au
+3	35	Br
+4	6	C	# Species index, atomic number, species label
+%endblock ChemicalSpeciesLabel
+
+AtomicCoordinatesFormat  Ang
+
+LatticeConstant		1 Ang
+
+%block LatticeParameters
+l_x	l_y	l_z	90.	90.	90.
+%endblock LatticeParameters
+
+%block kgrid_Monkhorst_Pack
+1	0	0	0.0
+0	1	0	0.0
+0	0	1	0.0
+%endblock kgrid_Monkhorst_Pack
+
+%block AtomicCoordinatesAndAtomicSpecies
+coord_block
+%endblock AtomicCoordinatesAndAtomicSpecies
+
+MeshCutoff		300 Ry		
+xc.functional		GGA		
+xc.authors		PBE		
+WriteDenchar		.true.		
+WriteCoorXmol		.true.		
+WriteEigenvalues	.true.		
+DM.NumberPulay     	5		
+DM.MixingWeight		0.01		
+DM.UseSaveDM		.true.		
+MaxSCFIterations	1500		
+PAO.EnergyShift		0.011 Ry
+TS.UpdateDMCROnly	.false.
+SolutionMethod		transiesta
+
+# TranSIESTA and tbtrans parameters
+
+TS.ComplexContour.NumPoles	8		# Num of Fermi poles that the complex contour should include; default = 6
+TS.ComplexContour.NumCircle	48		# Num of points along the arc part of the contour (starting at ComplexContour.Emin and ending at E_Fermi = 0); default = 24
+TS.ComplexContour.NumLine		8	# Num of points on the line part of the contour; default = 6
+
+TS.TBT.NPoints	201			# Number of energy points of the transmission function between Emin and Emax; default = 100
+TS.TBT.Emin	-2 eV		# Lowest energy value of the computed transmission function; default = -2 eV
+TS.TBT.Emax	+2 eV		# Highest energy value of the computed transmission function; default = 2 eV
+TS.Voltage	0 eV			# Voltage applied along the z-direction; default = 0 eV
+
+TS.HSFileLeft	left/left.TSHS
+TS.NumUsedAtomsLeft		num_elec
+
+TS.HSFileRight	right/right.TSHS
+TS.NumUsedAtomsRight	num_elec
+EOF
+
+# Launch MPI job...
+# mpirun -np 20 /home/khaiyi/src/siesta-4.0/transiesta < some_name.fdf |tee some_name.out
+ibrun ./transiesta < job_name.fdf
