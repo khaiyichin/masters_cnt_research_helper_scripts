@@ -1,6 +1,6 @@
 import custom_constants as const
 
-import os
+import os, stat
 from shutil import copyfile
 
 class XyzFileEntry:
@@ -119,6 +119,8 @@ class ConductanceMain:
         with open(output_path, 'w') as file:
             file.write(filedata)
 
+        os.chmod(output_path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO ) # change the execution permissions
+
         print('Completed!')
 
 class ConductanceModel:
@@ -233,6 +235,8 @@ class ConductanceModel:
         # Update output file
         with open(output_path, 'w') as file:
             file.write(filedata)
+
+        os.chmod(output_path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO ) # change the execution permissions
 
         print('Completed!')
 
