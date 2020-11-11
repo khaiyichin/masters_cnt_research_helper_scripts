@@ -29,7 +29,9 @@ while True:
     else:
         print('Job name is required!')
 
-num_elec = int(input('Number of atoms in each electrode: '))
+num_tot_dop = int(input('Number of dopant atoms in the model: '))
+num_elec_atoms = int(input('Number of atoms in each electrode: '))
+num_elec_dop = int(input('Number of dopant atoms in each electrode: ')) if num_tot_dop > 0 else 0
 cnt_type = input('CNT type (zigzag): ') or 'zigzag'
 
 # Optional inputs
@@ -45,8 +47,8 @@ if should_modify == 'y' or should_modify == 'yes' or should_modify == 'Y':
     job_alloc = input('Allocation name (AIMD): ') or 'AIMD'
 else:
     job_queue = 'normal'
-    job_nodes = '3'
-    job_ntasks = '42'
+    job_nodes = '2'
+    job_ntasks = '24'
     job_runtime = '48:00:00'
     job_email = 'khaiyichin@utexas.edu'
     job_notif_type = 'all'
@@ -58,13 +60,13 @@ main = ConductanceMain(job_name, job_queue, job_nodes, job_ntasks, job_runtime, 
 main.generate_script()
 
 # Generate the full device job script
-full_dev = ConductanceFullDevice(filename, job_name, num_elec, cnt_type)
+full_dev = ConductanceFullDevice(filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop)
 full_dev.generate_script()
 
 # Generate the electrodes
-left_elec = ConductanceElectrode(filename, 'left', num_elec, cnt_type)
+left_elec = ConductanceElectrode(filename, 'left', num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop)
 left_elec.generate_script()
 
 # Generate the electrodes
-right_elec = ConductanceElectrode(filename, 'right', num_elec, cnt_type)
+right_elec = ConductanceElectrode(filename, 'right', num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop)
 right_elec.generate_script()

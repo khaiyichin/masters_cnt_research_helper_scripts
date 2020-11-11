@@ -127,13 +127,15 @@ class ConductanceModel:
     """Parent class for conductance model scripts (main device, left electrode, and right electrode).
     """
 
-    def __init__(self, xyz_filename, job_name, num_elec, cnt_type):
+    def __init__(self, xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop):
         """Initializes ConductanceModel with parameters."""
 
         self.filename = xyz_filename
         self.job_name = job_name
-        self.num_elec = num_elec
+        self.num_elec_atoms = num_elec_atoms
         self.cnt_type = cnt_type
+        self.num_elec_dop = num_elec_dop
+        self.num_tot_dop = num_tot_dop
 
         # Declare variables to be filled in the child class
         self.num_atoms = 0
@@ -147,16 +149,32 @@ class ConductanceModel:
     def truncate_full_list_coord_obj(self, left_or_right):
         """Reduces the list of XyzFileEntry objects to fit the electrode size."""
 
+        # Set the starting index for dopant atoms
+        dopant_start_ind = self.full_num_atoms - self.num_tot_dop
+
         if left_or_right == 'left':
-            return [self.full_list_coord_obj[i] for i in range(0, self.num_atoms, 1)]
+
+            # Dopant coordinates are usually organized at the end
+            non_dopant_coords = [self.full_list_coord_obj[i] for i in range(0, self.num_atoms - self.num_elec_dop, 1)]
+
+            dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind, dopant_start_ind + self.num_elec_dop, 1)]
+
+            return non_dopant_coords + dopant_coords
 
         elif left_or_right == 'right':
-            return [self.full_list_coord_obj[i] for i in range(self.full_num_atoms - self.num_atoms, self.full_num_atoms, 1)]
+
+            # Dopant coordinates are usually organized at the end
+            non_dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind - self.num_atoms, dopant_start_ind, 1)]
+
+            dopant_coords = [self.full_list_coord_obj[i] for i in range(self.full_num_atoms - self.num_elec_dop, self.full_num_atoms, 1)]
+
+            return non_dopant_coords + dopant_coords
 
         else:
             print('Invalid electrode side, please input \'left\' or \'right\'!')
 
-    def restructure_relaxed_coordinates(self, device_type):
+
+    def restructure_relaxed_coordinates(self):
         """Restucture coordinates (from .xyz form to SIESTA AtomicCoordinatesAndAtomicSpecies block input form)
         """
 
@@ -205,18 +223,26 @@ class ConductanceModel:
 
         print('\nCreating ' + device_type + ' conductance job script...')
 
+        output_path = ''
+
         # Duplicate the template file
         if device_type == 'electrode':
             template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates/swnt_conductance_electrode')
 
+            # Create the directory if it doesn't exist
+            try: os.mkdir(os.path.join(os.path.dirname(os.path.realpath(__file__)), self.job_name))
+            except: pass
+
+            output_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.job_name, self.job_name)
+
         elif device_type == 'full':
             template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates/swnt_conductance_full')
+            output_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.job_name)
 
         else:
             print('Invalid device type, please input \'full\' or \'electrode\'!')
             
-        output_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.job_name)
-
+        # Duplicate the template to fill it up
         copyfile(template_path, output_path)
 
         # Open file to read and close
@@ -230,7 +256,7 @@ class ConductanceModel:
         filedata = filedata.replace('l_y', '{:.6f}'.format(self.lattice_sizes[1])) # lattice size in y axis
         filedata = filedata.replace('l_z', '{:.6f}'.format(self.lattice_sizes[2])) # lattice size in z axis
         filedata = filedata.replace('coord_block', self.coord_block) # coordinate and species block
-        filedata = filedata.replace('num_elec', str(self.num_elec)) # number of atoms in electrodes
+        filedata = filedata.replace('num_elec_atoms', str(self.num_elec_atoms)) # number of atoms in electrodes
 
         # Update output file
         with open(output_path, 'w') as file:
@@ -244,12 +270,12 @@ class ConductanceElectrode(ConductanceModel):
     """Class for generating the electrode conductance model scripts.
     """
 
-    def __init__(self, xyz_filename, job_name, num_elec, cnt_type):
+    def __init__(self, xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop):
         """Initializes ConductanceFullDevice with parameters."""
 
-        super().__init__(xyz_filename, job_name, num_elec, cnt_type) # inherit parent class methods and properties
+        super().__init__(xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop) # inherit parent class methods and properties
 
-        self.num_atoms = self.num_elec
+        self.num_atoms = self.num_elec_atoms
 
         self.list_coord_obj = self.truncate_full_list_coord_obj(job_name) # only a section of the full coordinates are used for the electrode
 
@@ -257,7 +283,7 @@ class ConductanceElectrode(ConductanceModel):
         self.lattice_sizes = self.get_conductance_lattice_size(const.lattice_spacing, self.cnt_type)
 
         # Restucture coordinates (from .xyz form to SIESTA AtomicCoordinatesAndAtomicSpecies block input form)
-        self.coord_block = self.restructure_relaxed_coordinates('electrode')
+        self.coord_block = self.restructure_relaxed_coordinates()
 
     def generate_script(self):
         """Generates the appropriate device job script."""
@@ -268,10 +294,10 @@ class ConductanceFullDevice(ConductanceModel):
     """Class for generating the full device conductance model script.
     """    
     
-    def __init__(self, xyz_filename, job_name, num_elec, cnt_type):
+    def __init__(self, xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop):
         """Initializes ConductanceFullDevice with parameters."""
 
-        super().__init__(xyz_filename, job_name, num_elec, cnt_type) # inherit parent class methods and properties
+        super().__init__(xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop) # inherit parent class methods and properties
 
         self.num_atoms = self.full_num_atoms
 
@@ -281,7 +307,7 @@ class ConductanceFullDevice(ConductanceModel):
         self.lattice_sizes = self.get_conductance_lattice_size(const.lattice_spacing, self.cnt_type)
 
         # Restucture coordinates (from .xyz form to SIESTA AtomicCoordinatesAndAtomicSpecies block input form)
-        self.coord_block = self.restructure_relaxed_coordinates('full')
+        self.coord_block = self.restructure_relaxed_coordinates()
 
     def generate_script(self):
         """Generates the appropriate device job script."""

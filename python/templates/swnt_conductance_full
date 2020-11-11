@@ -58,10 +58,10 @@ TS.TBT.Emax	+2 eV		# Highest energy value of the computed transmission function;
 TS.Voltage	0 eV			# Voltage applied along the z-direction; default = 0 eV
 
 TS.HSFileLeft	left/left.TSHS
-TS.NumUsedAtomsLeft		num_elec
+TS.NumUsedAtomsLeft		num_elec_atoms
 
 TS.HSFileRight	right/right.TSHS
-TS.NumUsedAtomsRight	num_elec
+TS.NumUsedAtomsRight	num_elec_atoms
 EOF
 
 # Launch MPI job...
