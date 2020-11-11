@@ -39,8 +39,8 @@ should_modify = input('Modify default values? (no): ') or 'no'
 
 if should_modify == 'y' or should_modify == 'yes' or should_modify == 'Y':
     job_queue = input('Job queue name (normal): ') or 'normal'
-    job_nodes = input('Number of nodes (3): ') or '3'
-    job_ntasks = input('Number of tasks per node (42): ') or '42'
+    job_nodes = input('Number of nodes (2): ') or '2'
+    job_ntasks = input('Number of tasks per node (24): ') or '24'
     job_runtime = input('Maximum allowed runtime in hh:mmm:ss (48:00:00): ') or '48:00:00'
     job_email = input('Notification email address (khaiyichin@utexas.edu): ') or 'khaiyichin@utexas.edu'
     job_notif_type = input('Notification types (all): ') or 'all'

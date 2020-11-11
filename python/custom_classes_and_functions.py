@@ -146,36 +146,60 @@ class ConductanceModel:
         # Read in and store .xyz file
         self.full_num_atoms, self.full_list_coord_obj =  extract_xyz_file(self.filename)
 
-    def truncate_full_list_coord_obj(self, left_or_right):
-        """Reduces the list of XyzFileEntry objects to fit the electrode size."""
+    def reshape_relaxed_coords(self, model_type):
+        """Reshapes the list of XyzFileEntry objects to fit the electrode size and to match required coordinate order."""
 
         # Set the starting index for dopant atoms
         dopant_start_ind = self.full_num_atoms - self.num_tot_dop
 
-        if left_or_right == 'left':
+        if model_type == 'left':
 
             # Dopant coordinates are usually organized at the end
-            non_dopant_coords = [self.full_list_coord_obj[i] for i in range(0, self.num_atoms - self.num_elec_dop, 1)]
+            non_dopant_coords = [self.full_list_coord_obj[i] for i in range(0, self.num_elec_atoms - self.num_elec_dop, 1)]
 
             dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind, dopant_start_ind + self.num_elec_dop, 1)]
 
             return non_dopant_coords + dopant_coords
 
-        elif left_or_right == 'right':
+        elif model_type == 'right':
 
             # Dopant coordinates are usually organized at the end
-            non_dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind - self.num_atoms, dopant_start_ind, 1)]
+            non_dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind - self.num_elec_atoms + self.num_elec_dop, dopant_start_ind, 1)]
 
             dopant_coords = [self.full_list_coord_obj[i] for i in range(self.full_num_atoms - self.num_elec_dop, self.full_num_atoms, 1)]
 
             return non_dopant_coords + dopant_coords
 
+        elif model_type == 'full':
+
+            # Left electrode
+            non_dopant_coords = [self.full_list_coord_obj[i] for i in range(0, self.num_elec_atoms - self.num_elec_dop, 1)]
+
+            dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind, dopant_start_ind + self.num_elec_dop, 1)]
+
+            left = non_dopant_coords + dopant_coords
+
+            # Main device
+            non_dopant_coords = [self.full_list_coord_obj[i] for i in range(self.num_elec_atoms - self.num_elec_dop, dopant_start_ind - self.num_elec_atoms + self.num_elec_dop, 1)]
+
+            dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind + self.num_elec_dop, self.full_num_atoms - self.num_elec_dop, 1)]
+
+            middle = non_dopant_coords + dopant_coords
+
+            # Right electrode
+            non_dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind - self.num_elec_atoms + self.num_elec_dop, dopant_start_ind, 1)]
+
+            dopant_coords = [self.full_list_coord_obj[i] for i in range(self.full_num_atoms - self.num_elec_dop, self.full_num_atoms, 1)]
+
+            right = non_dopant_coords + dopant_coords
+
+            return left + middle + right
+
         else:
-            print('Invalid electrode side, please input \'left\' or \'right\'!')
+            print('Invalid model type, please input \'left\', \'middle\' or \'right\'!')
 
-
-    def restructure_relaxed_coordinates(self):
-        """Restucture coordinates (from .xyz form to SIESTA AtomicCoordinatesAndAtomicSpecies block input form)
+    def transform_coordinates_species_to_str(self):
+        """Transform coordinates (from .xyz form to SIESTA AtomicCoordinatesAndAtomicSpecies block input form)
         """
 
         # Get the minimum z coordinate
@@ -277,13 +301,13 @@ class ConductanceElectrode(ConductanceModel):
 
         self.num_atoms = self.num_elec_atoms
 
-        self.list_coord_obj = self.truncate_full_list_coord_obj(job_name) # only a section of the full coordinates are used for the electrode
+        self.list_coord_obj = self.reshape_relaxed_coords(job_name) # only a section of the full coordinates are used for the electrode
 
         # Get the lattice size
         self.lattice_sizes = self.get_conductance_lattice_size(const.lattice_spacing, self.cnt_type)
 
         # Restucture coordinates (from .xyz form to SIESTA AtomicCoordinatesAndAtomicSpecies block input form)
-        self.coord_block = self.restructure_relaxed_coordinates()
+        self.coord_block = self.transform_coordinates_species_to_str()
 
     def generate_script(self):
         """Generates the appropriate device job script."""
@@ -301,13 +325,13 @@ class ConductanceFullDevice(ConductanceModel):
 
         self.num_atoms = self.full_num_atoms
 
-        self.list_coord_obj = self.full_list_coord_obj # the full coordinates are used for the full device 
+        self.list_coord_obj = self.reshape_relaxed_coords('full') # reorganize the coordinates
 
         # Get the lattice size
         self.lattice_sizes = self.get_conductance_lattice_size(const.lattice_spacing, self.cnt_type)
 
         # Restucture coordinates (from .xyz form to SIESTA AtomicCoordinatesAndAtomicSpecies block input form)
-        self.coord_block = self.restructure_relaxed_coordinates()
+        self.coord_block = self.transform_coordinates_species_to_str()
 
     def generate_script(self):
         """Generates the appropriate device job script."""
