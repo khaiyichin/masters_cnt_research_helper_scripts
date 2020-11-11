@@ -103,7 +103,7 @@ class ConductanceMain:
         # Duplicate the template file
         template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates/swnt_conductance_main')
 
-        output_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.job_name + '_main')
+        output_path = os.path.join(os.getcwd(), self.job_name + '_main')
 
         copyfile(template_path, output_path)
 
@@ -230,14 +230,14 @@ class ConductanceModel:
             template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates/swnt_conductance_electrode')
 
             # Create the directory if it doesn't exist
-            try: os.mkdir(os.path.join(os.path.dirname(os.path.realpath(__file__)), self.job_name))
+            try: os.mkdir(os.path.join(os.getcwd(), self.job_name))
             except: pass
 
-            output_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.job_name, self.job_name)
+            output_path = os.path.join(os.getcwd(), self.job_name, self.job_name)
 
         elif device_type == 'full':
             template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates/swnt_conductance_full')
-            output_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.job_name)
+            output_path = os.path.join(os.getcwd(), self.job_name)
 
         else:
             print('Invalid device type, please input \'full\' or \'electrode\'!')
