@@ -234,9 +234,9 @@ class ConductanceModel:
         
         min_max_tup = find_min_max(self.list_coord_obj)
 
-        l_x = additional_spacing + min_max_tup[3] - min_max_tup[0]
+        l_x = additional_spacing + min_max_tup[3]
 
-        l_y = additional_spacing + min_max_tup[4] - min_max_tup[1]
+        l_y = additional_spacing + min_max_tup[4]
 
         l_z = z_spacing + min_max_tup[5] - min_max_tup[2]
 
