@@ -2,7 +2,7 @@
 """
 Script to generate a conductance job script based on the .xyz file generated from a relaxation run.
 """
-from custom_classes_and_functions import XyzFileEntry, extract_xyz_file, ConductanceMain, ConductanceFullDevice, ConductanceElectrode
+from custom_classes_and_functions import XyzFileEntry, ConductanceMain, ConductanceFullDevice, ConductanceElectrode
 
 import argparse
 import os

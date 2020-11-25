@@ -1,6 +1,7 @@
 import custom_constants as const
 
 import os, stat
+from statistics import mean
 from shutil import copyfile
 
 class XyzFileEntry:
@@ -84,6 +85,18 @@ def populate_sbatch_parameters(job_name, job_queue, job_nodes, job_ntasks, job_r
     sbatch_parameters = sbatch_parameters.replace('job_alloc', job_alloc) # job allocation code
 
     return sbatch_parameters
+
+def compute_rms_difference(val_list_1, val_list_2):
+    """Computes the RMS difference between two arrays of values.
+    """
+
+    if len(val_list_1) != len(val_list_2):
+        print('Lengths of the two arrays are not equal!')
+        return
+        
+    mean_squared_diff = mean([(val_list_1[ind] - val_list_2[ind])**2 for ind in range(len(val_list_1))])
+
+    return mean_squared_diff**(0.5)
 
 class ConductanceMain:
     """Class to store the main script for conductance jobs.
