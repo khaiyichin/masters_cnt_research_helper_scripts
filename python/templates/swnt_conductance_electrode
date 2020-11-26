@@ -47,4 +47,4 @@ EOF
 
 # Launch MPI job...
 # mpirun -np 20 /home/khaiyi/src/siesta-4.0/transiesta < some_name.fdf |tee some_name.out
-ibrun ./transiesta < job_name.fdf
+ibrun tacc_typetransiesta < job_name.fdf

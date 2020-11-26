@@ -140,7 +140,7 @@ class ConductanceModel:
     """Parent class for conductance model scripts (main device, left electrode, and right electrode).
     """
 
-    def __init__(self, xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop):
+    def __init__(self, xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop, tacc_type):
         """Initializes ConductanceModel with parameters."""
 
         self.filename = xyz_filename
@@ -149,6 +149,7 @@ class ConductanceModel:
         self.cnt_type = cnt_type
         self.num_elec_dop = num_elec_dop
         self.num_tot_dop = num_tot_dop
+        self.tacc_type = tacc_type
 
         # Declare variables to be filled in the child class
         self.num_atoms = 0
@@ -287,6 +288,8 @@ class ConductanceModel:
             filedata = file.read()
             
         # Replace values
+        exec_dir = './' if self.tacc_type == 'ls5' else ''
+
         filedata = filedata.replace('job_name', self.job_name) # job names
         filedata = filedata.replace('num_atoms', str(self.num_atoms)) # number of atoms
         filedata = filedata.replace('l_x', '{:.6f}'.format(self.lattice_sizes[0])) # lattice size in x axis
@@ -294,6 +297,7 @@ class ConductanceModel:
         filedata = filedata.replace('l_z', '{:.6f}'.format(self.lattice_sizes[2])) # lattice size in z axis
         filedata = filedata.replace('coord_block', self.coord_block) # coordinate and species block
         filedata = filedata.replace('num_elec_atoms', str(self.num_elec_atoms)) # number of atoms in electrodes
+        filedata = filedata.replace('tacc_type', exec_dir) # number of atoms in electrodes
 
         # Update output file
         with open(output_path, 'w') as file:
@@ -307,10 +311,10 @@ class ConductanceElectrode(ConductanceModel):
     """Class for generating the electrode conductance model scripts.
     """
 
-    def __init__(self, xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop):
+    def __init__(self, xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop, tacc_type):
         """Initializes ConductanceFullDevice with parameters."""
 
-        super().__init__(xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop) # inherit parent class methods and properties
+        super().__init__(xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop, tacc_type) # inherit parent class methods and properties
 
         self.num_atoms = self.num_elec_atoms
 
@@ -331,10 +335,10 @@ class ConductanceFullDevice(ConductanceModel):
     """Class for generating the full device conductance model script.
     """    
     
-    def __init__(self, xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop):
+    def __init__(self, xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop, tacc_type):
         """Initializes ConductanceFullDevice with parameters."""
 
-        super().__init__(xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop) # inherit parent class methods and properties
+        super().__init__(xyz_filename, job_name, num_elec_atoms, cnt_type, num_elec_dop, num_tot_dop, tacc_type) # inherit parent class methods and properties
 
         self.num_atoms = self.full_num_atoms
 
