@@ -4,6 +4,10 @@ import os, stat
 from statistics import mean
 from shutil import copyfile
 
+"""
+WARNING: THE CONDUCTANCE SCRIPT GENERATOR CURRENTLY ONLY WORKS FOR (5,5) OR (8,0) CNTS DUE TO THE atoms_per_layer VAR.
+"""
+
 class XyzFileEntry:
     """Class to store coordinate and species data extracted from .xyz files.
     """
@@ -163,6 +167,9 @@ class ConductanceModel:
     def reshape_relaxed_coords(self, model_type):
         """Reshapes the list of XyzFileEntry objects to fit the electrode size and to match required coordinate order."""
 
+        # Warning: the code is only applicable to (5,5) and (8,0) nanotubes
+        atoms_per_layer = 10 if self.cnt_type == 'armchair' else 8
+
         # Set the starting index for dopant atoms
         dopant_start_ind = self.full_num_atoms - self.num_tot_dop
 
@@ -170,6 +177,11 @@ class ConductanceModel:
 
             # Dopant coordinates are usually organized at the end
             non_dopant_coords = [self.full_list_coord_obj[i] for i in range(0, self.num_elec_atoms - self.num_elec_dop, 1)]
+
+            z_pos_1st_layer = mean([obj.z for obj in non_dopant_coords[:atoms_per_layer]])
+
+            for obj in non_dopant_coords[:atoms_per_layer]:
+                obj.z = z_pos_1st_layer
 
             dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind, dopant_start_ind + self.num_elec_dop, 1)]
 
@@ -180,6 +192,11 @@ class ConductanceModel:
             # Dopant coordinates are usually organized at the end
             non_dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind - self.num_elec_atoms + self.num_elec_dop, dopant_start_ind, 1)]
 
+            z_pos_last_layer = mean([obj.z for obj in non_dopant_coords[-atoms_per_layer:]])
+
+            for obj in non_dopant_coords[-atoms_per_layer:]:
+                obj.z = z_pos_last_layer
+
             dopant_coords = [self.full_list_coord_obj[i] for i in range(self.full_num_atoms - self.num_elec_dop, self.full_num_atoms, 1)]
 
             return non_dopant_coords + dopant_coords
@@ -189,11 +206,16 @@ class ConductanceModel:
             # Left electrode
             non_dopant_coords = [self.full_list_coord_obj[i] for i in range(0, self.num_elec_atoms - self.num_elec_dop, 1)]
 
+            z_pos_1st_layer = mean([obj.z for obj in non_dopant_coords[:atoms_per_layer]])
+
+            for obj in non_dopant_coords[:atoms_per_layer]:
+                obj.z = z_pos_1st_layer
+
             dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind, dopant_start_ind + self.num_elec_dop, 1)]
 
             left = non_dopant_coords + dopant_coords
 
-            # Main device
+            # Middle section
             non_dopant_coords = [self.full_list_coord_obj[i] for i in range(self.num_elec_atoms - self.num_elec_dop, dopant_start_ind - self.num_elec_atoms + self.num_elec_dop, 1)]
 
             dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind + self.num_elec_dop, self.full_num_atoms - self.num_elec_dop, 1)]
@@ -202,6 +224,11 @@ class ConductanceModel:
 
             # Right electrode
             non_dopant_coords = [self.full_list_coord_obj[i] for i in range(dopant_start_ind - self.num_elec_atoms + self.num_elec_dop, dopant_start_ind, 1)]
+            
+            z_pos_last_layer = mean([obj.z for obj in non_dopant_coords[-atoms_per_layer:]])
+
+            for obj in non_dopant_coords[-atoms_per_layer:]:
+                obj.z = z_pos_last_layer
 
             dopant_coords = [self.full_list_coord_obj[i] for i in range(self.full_num_atoms - self.num_elec_dop, self.full_num_atoms, 1)]
 
@@ -246,7 +273,7 @@ class ConductanceModel:
         else:
             print('Invalid CNT type!')
         
-        min_max_tup = find_min_max(self.list_coord_obj)
+        min_max_tup = find_min_max([obj for obj in self.list_coord_obj if obj.species == 'C'])
 
         l_x = additional_spacing + min_max_tup[3]
 
