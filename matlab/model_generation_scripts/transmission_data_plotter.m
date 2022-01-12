@@ -1,9 +1,9 @@
 clear
 close all
 %% Define user parameters
-directory = '/home/khaiyi/Documents/Data/CNT_with_KAuBr4/Junctions/5-5/55Junc_AuBr4/intertube=6.8/unrelaxed/55Junc_11AuBr4_2uc_overlap/conduction_calcs/';
+directory = '/home/khaiyichin/masters_cnt_research';
 cd(directory);
-filename = '55Junc_11AuBr4_2uc_overlap';
+filename = '80SWNT_K_1_1x1x1_kgrid';
 extension = '.AVTRANS';
 file = [filename,extension];
 
@@ -19,7 +19,7 @@ x_trans = 0/10;
 y_trans = 1.5/10;
 
 if custom_title == 1
-	plot_title = '(5,5) AuBr_4 Doped Junction';
+	plot_title = '(8,0) K-doped SWNT';
 else
 	plot_title = filename;
 end
@@ -80,10 +80,10 @@ if mplot==1
 	ylabel('G/G_0','FontSize',15);
 	set(gca,'FontSize',15);
 	xticks(-2:0.5:2)
-% 	yticks(0:1:9.5)
-% 	axis([-2,2,0,9.5])
-	yticks(0:0.5:2)
-	axis([-2,2,0,2])
+	yticks(0:1:9.5)
+	axis([-2,2,0,9.5])
+% 	yticks(0:0.5:2)
+% 	axis([-2,2,0,2])
 	if mlabel==1
 		text(zero_x+x_trans,zero_y/factor+y_trans,sprintf('(%.3f, %.3f)',0,zero_y/factor),'FontSize',16);
 		plot(0,zero_y/factor,'*r')

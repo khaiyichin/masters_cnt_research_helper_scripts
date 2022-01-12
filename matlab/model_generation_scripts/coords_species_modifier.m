@@ -2,26 +2,26 @@
 % Only converts .xyz files into .txt files
 clear
 
-cd /home/khaiyi/Documents/Data/CNT_with_KAuBr4/
+cd /home/khaiyichin/masters_cnt_research/
 
-folder_to_read = 'coord/2017115/';
-file_to_read = [folder_to_read,'20:56:33_55junc_custom2.xyz'];
+folder_to_read = 'temp/';
+file_to_read = [folder_to_read,'80SWNT_K_1.xyz'];
 
-folder_to_write = '/home/khaiyi/Documents/Data/CNT_with_KAuBr4/Junctions/5-5/55Junc_KAuBr4/intertube=6.8/unrelaxed/55Junc_11KAuBr4_3uc_overlap/';
-file_to_write = [folder_to_write,'55Junc_11KAuBr4_3uc_overlap_unrelaxed.txt'];
+folder_to_write = '/home/khaiyichin/masters_cnt_research/temp/test';
+file_to_write = [folder_to_write,'80SWNT_K_1.xyz'];
 if ~exist(folder_to_write, 'dir')
   mkdir(folder_to_write);
 end
 
 %% Check whether reading .xyz file of relaxed coordinates (CHECK BEFORE RUNNING)
-relaxed_coords = 2;		% 1 - unrelaxed (coordinates for relaxation calcs); 2 - unrelaxed (coordinates for conduction calcs); 3 - relaxed; 4 - Band structure calcs
-big_box = 1;			% 1 = big computational unit cell; 0 = translational asymmetric unit cell in z direction
-chirality = [5,5];
+relaxed_coords = 3;		% 1 - unrelaxed (coordinates for relaxation calcs); 2 - unrelaxed (coordinates for conduction calcs); 3 - relaxed; 4 - Band structure calcs
+big_box = 0;			% 1 = big computational unit cell; 0 = translational asymmetric unit cell in z direction
+chirality = [8,0];
 
 % For relaxed_coords ~= 1 or 4, fill the parameters below:
 num_of_CNT = 1;
-electrode_num_atoms = 40;	% C only without dopants in ONE electrode: for SWNT (5,5) each unit cell has 20 atoms; for (8,0) each unit cell has 32 atoms
-electrode_dopant_atoms = 12;	% total dopant atoms in ONE electrode
+electrode_num_atoms = 64;	% C only without dopants in ONE electrode: for SWNT (5,5) each unit cell has 20 atoms; for (8,0) each unit cell has 32 atoms
+electrode_dopant_atoms = 2;	% total dopant atoms in ONE electrode
 
 %% Convert coordinates and species
 % Accounting for semi-infinity and periodicity of electrodes
@@ -245,6 +245,8 @@ switch relaxed_coords
 		
 	len_x = max(x) - min(x);
 	len_y = max(y) - min(y);
+    max(y)
+    min(y)
 	len_of_CNT = max(z) - min(z);
 
 	ave_pos_right = mean(right(:,1));		% averaging the end layer positions (so each end layer share the same z-coord)
